@@ -7,5 +7,5 @@ Using WebRTC I receive an image from a webcam. Next, I record this video in the 
 
 <p>Пример работы</p>
 <div id="header" align="center">
-  <img src="1.jpg" width="700"/>
+  <img src="1.jpg" width="900"/>
 </div>
