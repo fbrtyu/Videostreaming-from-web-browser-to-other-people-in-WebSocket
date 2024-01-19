@@ -1,0 +1,79 @@
+<html>
+<style>
+    #videoObjectHtml5ApiServer2 {
+        width: 854px;
+        height: 480px;
+        background: #666;
+    }
+</style>
+
+<body>
+    <!-- Создание видео элементов и кнопки начала трансляции -->
+    <video autoplay id="videoObjectHtml5ApiServer2"></video>
+    <button id="b1" onclick="StartStream()">Начать</button>
+
+    <script type="text/javascript">
+        //Сокет для видео
+        let socketVideo = new WebSocket("ws:localhost:8090/video");
+
+        //Структура для передачи видео
+        var videoD = {
+            data: "data"
+        }
+
+        //Переменные для передачи видео
+        let base64Data;
+        let base64;
+        let base64Response;
+        let blob;
+
+        //Тут парсим видео данные
+        //Читаем как Base64
+        //Преобразуем ответ в Blob
+        socketVideo.onmessage = async function (event) {
+            var videoData = await JSON.parse(event.data, function (key, value) {
+                if (key == 'data') {
+                    return new String(value);
+                }
+                return value;
+            });
+
+            base64Data = videoData.data;
+            //base64 = await fetch(base64Data, {mode: "no-cors", method: "GET", });
+            console.log(base64Data);
+            base64Response = await fetch(`${base64Data}`);
+            blob = await base64Response.blob();
+
+            //Функция для чтения данных из Blob и добавление их в буфер воспроизведения
+            await printFile(blob);
+        };
+
+        //Переменные плееров
+        var video2 = document.getElementById('videoObjectHtml5ApiServer2'); //Воспроизведение полученного из вебсокет видео
+
+        //Создаем медиаресурс и подключаем его к плееру 2
+        var mediaSource2 = new MediaSource();
+        var sourceBuffer;
+        video2.src = URL.createObjectURL(mediaSource2);
+
+        mediaSource2.addEventListener('sourceopen', sourceOpen); //Событие открытия медиаресурса плеера 2
+
+        //Функция срабатывает при открвтии плеера 2 и создает буфер к медиаресурсу 2-го плеера, куда потом будет добавлять кусочки данных из Blob полученных от вебсокета
+        function sourceOpen() {
+            sourceBuffer = mediaSource2.addSourceBuffer('video/webm; codecs=vp8');
+        };
+
+        //Чтение полученных Blob из вебсокета и добавление его в медиа буфер 2-го плеера
+        async function printFile(file) {
+            var reader = new FileReader();
+                reader.onload = async function (evt) {
+                    await sourceBuffer.appendBuffer(evt.target.result);
+                    mediaSource2.endOfStream();
+                    video2.play();
+                };
+            await reader.readAsArrayBuffer(file);
+        }
+    </script>
+</body>
+
+</html>

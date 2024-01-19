@@ -59,6 +59,8 @@ func main() {
 }
 
 func handleConnections(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type, X-Requested-With")
 	// Upgrade initial GET request to a websocket
 	log.Println("User connected: " + r.Host)
 
@@ -87,6 +89,8 @@ func handleConnections(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleConnectionsVideo(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type, X-Requested-With")
 	// Upgrade initial GET request to a websocket
 	log.Println("User connected: " + r.Host)
 
