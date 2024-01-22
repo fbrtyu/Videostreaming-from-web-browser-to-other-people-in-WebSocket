@@ -151,6 +151,8 @@
                         videoBitsPerSecond: 1 * 1000 * 1024 * 8,
                     };
 
+                    var f = new Blob()
+
                     var mediaRecorder = new MediaRecorder(stream, recorderOptions)
 
                     //Тут происходит получение Blob данных при записи
@@ -160,7 +162,7 @@
                         if (e.data && e.data.size > 0) {
                             var reader2 = new FileReader();
                             reader2.onload = function (evt) {
-                                videoD.data = evt.target.result;
+                               videoD.data = evt.target.result;
                             };
                             reader2.readAsDataURL(e.data);
                             socketVideo.send(JSON.stringify(videoD));
