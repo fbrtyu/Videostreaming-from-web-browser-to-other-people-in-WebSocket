@@ -17,7 +17,7 @@ var clientsVideo = make(map[*websocket.Conn]bool)
 var broadcastVideo = make(chan Video)
 var clientMassVideo = make(map[string]*websocket.Conn)
 
-// Конфигурация будущих вебсокет соединений (разрешение получени и отправки всех данных)
+// Конфигурация будущих вебсокет соединений (разрешение получения и отправки всех данных)
 var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
 		return true
