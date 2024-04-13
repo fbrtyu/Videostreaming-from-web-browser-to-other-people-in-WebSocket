@@ -1,14 +1,8 @@
 <html>
 <style>
-    #videoObjectHtml5ApiServer1 {
+    #videoObjectHtml5ApiServer {
         width: 640px;
         height: 360px;
-        background: #666;
-    }
-
-    #videoObjectHtml5ApiServer2 {
-        width: 854px;
-        height: 480px;
         background: #666;
     }
 </style>
@@ -23,7 +17,7 @@
     </p>
 
     <!-- Создание видео элементов и кнопки начала трансляции -->
-    <video autoplay id="videoObjectHtml5ApiServer1"></video>
+    <video autoplay id="videoObjectHtml5ApiServer"></video>
     <button id="b1" onclick="StartStream()">Начать</button>
 
     <script type="text/javascript">
@@ -66,7 +60,6 @@
 
         //Переменные для передачи видео
         let base64Data;
-        let base64;
         let base64Response;
         let blob;
 
@@ -94,13 +87,13 @@
         };
 
         //Переменные плееров
-        var video1 = document.getElementById('videoObjectHtml5ApiServer1'); //Просто превью
+        var video = document.getElementById('videoObjectHtml5ApiServer'); //Просто превью
 
         //webrtc. Получение данных с вебки и дублирование их в 1-ый плеер
         function StartStream() {
             if (navigator.mediaDevices.getUserMedia) {
                 navigator.mediaDevices.getUserMedia({ video: true, audio: false }).then(function (stream) {
-                    video1.srcObject = stream;
+                    video.srcObject = stream;
 
                     //Параметры качества записи с вебки
                     var recorderOptions = {
@@ -115,17 +108,17 @@
                     //И собственно их отправка в вебсокет
                     mediaRecorder.ondataavailable = function (e) {
                         if (e.data && e.data.size > 0) {
-                            var reader2 = new FileReader();
-                            reader2.onload = function (evt) {
+                            var reader = new FileReader();
+                            reader.onload = function (evt) {
                                 videoD.data = evt.target.result;
                             };
-                            reader2.readAsDataURL(e.data);
+                            reader.readAsDataURL(e.data);
                             socketVideo.send(JSON.stringify(videoD));
                         }
                     }
 
                     //Каждые 2 сек происходит запись и отправка
-                    mediaRecorder.start(1000);
+                    mediaRecorder.start(2000);
 
                 }).catch(function (err) { console.log(err); });
             }
