@@ -17,7 +17,9 @@
 
         //Структура для передачи видео
         var videoD = {
-            data: "data"
+            data: "data",
+            keyframe: "keyframe",
+            time: 0.0
         }
 
         //Переменные для передачи видео
@@ -25,23 +27,71 @@
         let base64Response;
         let blob;
 
+        let k = "keyframe";
+        let time = 0.0;
+        let data = "data";
+        let s = false;
+        let os = false;
+
         //Тут парсим видео данные
         //Читаем как Base64
         //Преобразуем ответ в Blob
         socketVideo.onmessage = async function (event) {
             var videoData = await JSON.parse(event.data, function (key, value) {
-                if (key == 'data') {
-                    return new String(value);
+                if (key == 'keyframe') {
+                    //return new String(value);
+                    k = new String(value);
+                    //videoD.keyframe = k;
                 }
-                return value;
+                if (key == 'data') {
+                    //return new String(value);
+                    data = new String(value);
+                    //videoD.keyframe = data;
+                }
+                if (key == 'time') {
+                    //return new String(value);
+                    time = new String(value);
+                    //videoD.keyframe = time;
+                }
+                //return value;
             });
 
-            base64Data = videoData.data;
-            base64Response = await fetch(base64Data, { mode: "no-cors", method: "GET", });
-            blob = await base64Response.blob();
+            //base64Data = videoData.data;
+            //base64Data = data;
+            //base64Response = await fetch(base64Data, { mode: "no-cors", method: "GET", });
+            //blob = await base64Response.blob();
 
             //Функция для чтения данных из Blob и добавление их в буфер воспроизведения
-            await printFile(blob);
+            //await printFile(blob);
+
+            //console.log(k, data, time);
+
+            if(s == false) {
+                s = true;
+                base64Data = k;
+                base64Response = await fetch(base64Data, { mode: "no-cors", method: "GET", });
+                blob = await base64Response.blob();
+
+                //Функция для чтения данных из Blob и добавление их в буфер воспроизведения
+                await printFile(blob);
+            } else {
+                base64Data = data;
+                base64Response = await fetch(base64Data, { mode: "no-cors", method: "GET", });
+                blob = await base64Response.blob();
+
+                //Функция для чтения данных из Blob и добавление их в буфер воспроизведения
+                if(os == false) {
+                    os = true;
+                    video.currentTime = parseFloat(time);
+                    await printFile(blob);
+                } else {
+                    video.currentTime = parseFloat(time);  // Если убрать эту строку, то при первом включении видео, оно будет работать без подвисаний, если перезагрузить, то перестанет работать
+                    await printFile(blob);
+                }
+                //video.currentTime = parseFloat(time);
+                //console.log(parseFloat(time));
+                //await printFile(blob);
+            }
         };
 
         //Переменные плееров
@@ -64,6 +114,7 @@
             var reader = new FileReader();
             reader.onload = async function (evt) {
                 await sourceBuffer.appendBuffer(evt.target.result);
+                //console.log(video.currentTime);
                 video.play();
             };
             await reader.readAsArrayBuffer(file);

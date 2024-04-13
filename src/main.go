@@ -34,7 +34,9 @@ type Message struct {
 
 // Структура видео потока
 type Video struct {
-	Data string `json:"data"`
+	Data     string  `json:"data"`
+	Keyframe string  `json:"keyframe"`
+	Time     float32 `json:"time"`
 }
 
 func main() {

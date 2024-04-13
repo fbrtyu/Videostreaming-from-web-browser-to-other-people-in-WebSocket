@@ -37,7 +37,9 @@
 
         //Структура для передачи видео
         var videoD = {
-            data: "data"
+            data: "data",
+            keyframe: "keyframe",
+            time: 0.0
         }
 
         socket.onopen = function (e) {
@@ -89,6 +91,9 @@
         //Переменные плееров
         var video = document.getElementById('videoObjectHtml5ApiServer'); //Просто превью
 
+        let time = 0;
+        let tf = false;
+
         //webrtc. Получение данных с вебки и дублирование их в 1-ый плеер
         function StartStream() {
             if (navigator.mediaDevices.getUserMedia) {
@@ -107,16 +112,29 @@
                     //Чтение этих Blob данных, конвертирование в Base64, чтобы их как строку передать по вебсокету
                     //И собственно их отправка в вебсокет
                     mediaRecorder.ondataavailable = function (e) {
+                        if(tf == false) {
+                            time = video.currentTime;
+                            tf = true;
+                        }
                         if (e.data && e.data.size > 0) {
                             var reader = new FileReader();
                             reader.onload = function (evt) {
-                                videoD.data = evt.target.result;
+                                if(videoD.keyframe === "keyframe") {
+                                    videoD.keyframe = evt.target.result;
+                                    videoD.data = evt.target.result;
+                                    videoD.time = 0;
+                                } else {
+                                    videoD.data = evt.target.result;
+                                    videoD.time = video.currentTime - time;
+                                }
                             };
                             reader.readAsDataURL(e.data);
                             socketVideo.send(JSON.stringify(videoD));
                         }
+                        //videoD.time = video.currentTime - time;
+                        //console.log(video.currentTime - time);
                     }
-
+                    
                     //Каждые 2 сек происходит запись и отправка
                     mediaRecorder.start(2000);
 
